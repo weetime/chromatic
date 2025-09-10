@@ -1,0 +1,606 @@
+/* 全局样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    width: 480px;
+    max-width: 480px;
+    min-width: 320px;
+    min-height: 400px;
+    max-height: 600px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #333;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    background: white;
+    border-radius: 12px;
+    margin: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+/* 头部样式 */
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 16px 20px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo svg {
+    color: white;
+}
+
+.logo h1 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.controls {
+    display: flex;
+    gap: 8px;
+}
+
+/* 按钮样式 */
+.btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-primary:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.btn-small {
+    padding: 4px 6px;
+    font-size: 11px;
+}
+
+.btn-danger {
+    background: #ff4757;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #ff3742;
+    transform: translateY(-1px);
+}
+
+/* 统计信息样式 */
+.stats {
+    display: flex;
+    padding: 16px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    gap: 24px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #495057;
+    background: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    min-width: 24px;
+    text-align: center;
+}
+
+/* 搜索栏样式 */
+.search-bar {
+    position: relative;
+    padding: 16px 20px;
+    background: white;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 12px 10px 40px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+    background: #f8f9fa;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #667eea;
+    background: white;
+}
+
+.search-icon {
+    position: absolute;
+    left: 32px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    pointer-events: none;
+}
+
+/* 表格容器样式 */
+.table-container {
+    max-height: 280px;
+    min-height: 200px;
+    overflow-y: auto;
+    background: white;
+}
+
+/* 表格样式 */
+.messages-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.messages-table th {
+    background: #f8f9fa;
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #e9ecef;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+
+.sortable:hover {
+    background: #e9ecef;
+}
+
+.sortable.sorted {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.sort-icon {
+    margin-left: 4px;
+    font-size: 12px;
+    opacity: 0.6;
+}
+
+.messages-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f3f4;
+    vertical-align: middle;
+}
+
+.message-row:hover {
+    background: #f8f9fa;
+}
+
+/* 类型标签样式 */
+.type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.type-navigation {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.type-notification {
+    background: #fff3e0;
+    color: #f57c00;
+}
+
+.type-form {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.type-error {
+    background: #ffebee;
+    color: #d32f2f;
+}
+
+.type-info {
+    background: #e8f5e8;
+    color: #388e3c;
+}
+
+.type-success {
+    background: #e8f5e8;
+    color: #388e3c;
+}
+
+.type-warning {
+    background: #fff8e1;
+    color: #f9a825;
+}
+
+.type-default {
+    background: #f5f5f5;
+    color: #616161;
+}
+
+/* 标题单元格样式 */
+.title-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.favicon {
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.title {
+    font-weight: 500;
+    color: #333;
+    line-height: 1.4;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* URL链接样式 */
+.url-link {
+    color: #667eea;
+    text-decoration: none;
+    font-size: 12px;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+}
+
+.url-link:hover {
+    text-decoration: underline;
+    color: #5a6fd8;
+}
+
+/* 时间单元格样式 */
+.time-cell {
+    font-size: 12px;
+    color: #6c757d;
+    white-space: nowrap;
+}
+
+/* 操作单元格样式 */
+.action-cell {
+    text-align: center;
+    width: 60px;
+}
+
+/* 空状态样式 */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+    color: #6c757d;
+}
+
+.empty-icon {
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.empty-icon svg {
+    width: 48px;
+    height: 48px;
+    color: #dee2e6;
+}
+
+.empty-state h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+    color: #495057;
+}
+
+.empty-state p {
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 280px;
+}
+
+/* 滚动条样式 */
+.table-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* 响应式调整 */
+@media (max-width: 500px) {
+    body {
+        width: 320px;
+        min-width: 320px;
+    }
+    
+    .container {
+        margin: 4px;
+        border-radius: 8px;
+    }
+    
+    .header {
+        padding: 12px 16px;
+    }
+    
+    .logo h1 {
+        font-size: 16px;
+    }
+    
+    .stats {
+        padding: 12px 16px;
+        gap: 16px;
+    }
+    
+    .search-bar {
+        padding: 12px 16px;
+    }
+    
+    .table-container {
+        max-height: 240px;
+    }
+    
+    .messages-table {
+        font-size: 12px;
+    }
+    
+    .messages-table th,
+    .messages-table td {
+        padding: 8px 12px;
+    }
+    
+    .title {
+        max-width: 120px;
+    }
+    
+    .url-link {
+        max-width: 100px;
+    }
+    
+    .btn {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+}
+
+/* 确保popup在Chrome扩展中正确显示 */
+html, body {
+    overflow: hidden;
+}
+
+.container {
+    min-height: calc(100vh - 16px);
+    display: flex;
+    flex-direction: column;
+}
+
+.table-container {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* 调试样式 - 确保基本可见性 */
+.header {
+    min-height: 60px;
+}
+
+.stats {
+    min-height: 40px;
+}
+
+.search-bar {
+    min-height: 50px;
+}
+
+/* 空状态确保可见 */
+.empty-state {
+    min-height: 150px;
+    background: #fafafa;
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message-row {
+    animation: fadeIn 0.3s ease;
+}
+
+/* 加载状态 */
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #6c757d;
+}
+
+.loading::after {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e9ecef;
+    border-top: 2px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Push notification specific styles */
+.type-push_notification {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+}
+
+.type-test_notification {
+    background: linear-gradient(135deg, #00d2d3, #54a0ff);
+}
+
+.message-body {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 4px;
+    line-height: 1.3;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.status-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 8px;
+    font-weight: 500;
+}
+
+.status-received {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.status-clicked {
+    background: #e8f5e8;
+    color: #2e7d32;
+}
+
+.status-dismissed {
+    background: #fafafa;
+    color: #757575;
+}
+
+/* Test notification button */
+#testNotificationBtn {
+    margin-left: 8px;
+}
+
+/* Subscription info styles */
+.subscription-info {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 12px 16px;
+    border-left: 4px solid #667eea;
+}
+
+.subscription-info h4 {
+    margin-bottom: 8px;
+    color: #495057;
+    font-size: 14px;
+}
+
+.subscription-list {
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+.subscription-item {
+    padding: 4px 0;
+    font-size: 12px;
+    color: #6c757d;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.subscription-item:last-child {
+    border-bottom: none;
+}

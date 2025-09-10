@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消息收集器</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    </svg>
+                    <h1>Push通知收集器</h1>
+                </div>
+                <div class="controls">
+                    <button id="clearBtn" class="btn btn-secondary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        清空
+                    </button>
+                    <button id="exportBtn" class="btn btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        导出
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-label">总消息数:</span>
+                <span id="totalCount" class="stat-value">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">今日消息:</span>
+                <span id="todayCount" class="stat-value">0</span>
+            </div>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="搜索消息内容..." class="search-input">
+            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+                <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2"/>
+            </svg>
+        </div>
+
+        <div class="table-container">
+            <table id="messagesTable" class="messages-table">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-column="type">
+                            类型
+                            <span class="sort-icon">↕️</span>
+                        </th>
+                        <th class="sortable" data-column="title">
+                            标题
+                            <span class="sort-icon">↕️</span>
+                        </th>
+                        <th class="sortable" data-column="url">
+                            来源
+                            <span class="sort-icon">↕️</span>
+                        </th>
+                        <th class="sortable" data-column="timestamp">
+                            时间
+                            <span class="sort-icon">↕️</span>
+                        </th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="messagesBody">
+                    <!-- 消息数据将在这里动态加载 -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="emptyState" class="empty-state">
+            <div class="empty-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                    <path d="M21 16V8C20.9996 7.64928 20.9071 7.30481 20.7315 7.00116C20.556 6.69751 20.3037 6.44536 20 6.27L13 2.27C12.696 2.09446 12.3511 2.00205 12 2.00205C11.6489 2.00205 11.304 2.09446 11 2.27L4 6.27C3.69626 6.44536 3.44398 6.69751 3.26846 7.00116C3.09294 7.30481 3.00036 7.64928 3 8V16C3.00036 16.3507 3.09294 16.6952 3.26846 16.9988C3.44398 17.3025 3.69626 17.5546 4 17.73L11 21.73C11.304 21.9055 11.6489 21.9979 12 21.9979C12.3511 21.9979 12.696 21.9055 13 21.73L20 17.73C20.3037 17.5546 20.556 17.3025 20.7315 16.9988C20.9071 16.6952 20.9996 16.3507 21 16Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7.5 4.21L12 6.81L16.5 4.21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7.5 19.79V14.6L3 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M21 12L16.5 14.6V19.79" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 13.01V21.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h3>暂无Push通知</h3>
+            <p>访问支持Push API的网站，插件将自动收集推送通知消息</p>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
