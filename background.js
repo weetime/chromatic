@@ -2,187 +2,122 @@
 class PushNotificationManager {
     constructor() {
         this.messages = [];
-        this.maxMessages = 1000; // Maximum stored messages.
-        this.subscriptions = new Map(); // Store push subscriptions.
+        this.maxMessages = 1000;
+        this.subscriptions = new Map();
         this.init();
     }
 
     async init() {
-        // Load stored messages and subscriptions.
-        await this.loadMessages();
-        await this.loadSubscriptions();
-        
-        // Setup message listeners.
-        this.setupMessageListeners();
-        
-        // Setup push event listeners.
-        this.setupPushEventListeners();
-        
-        // Setup notification event listeners.
-        this.setupNotificationEventListeners();
-        
-        // Cleanup old messages.
+        await this.loadData();
+        this.setupEventListeners();
         this.cleanupOldMessages();
     }
 
+    async loadData() {
+        await Promise.all([
+            this.loadMessages(),
+            this.loadSubscriptions()
+        ]);
+    }
+
+    setupEventListeners() {
+        this.setupMessageListeners();
+        this.setupPushEventListeners();
+        this.setupNotificationEventListeners();
+    }
+
+    // Message handling
     setupMessageListeners() {
-        // Listen for messages from content scripts and popup.
         chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-            switch (message.type) {
-                case 'GET_MESSAGES':
-                    sendResponse({ messages: this.messages });
-                    break;
-                    
-                case 'CLEAR_MESSAGES':
-                    this.clearAllMessages();
-                    sendResponse({ success: true });
-                    break;
-                    
-                case 'GET_SUBSCRIPTIONS':
-                    sendResponse({ 
-                        subscriptions: Array.from(this.subscriptions.entries()) 
-                    });
-                    break;
-                    
-                case 'PUSH_SUBSCRIPTION_FOUND':
-                case 'PUSH_SUBSCRIPTION_UPDATE':
-                    this.handleSubscriptionEvent(message.data, sender);
-                    sendResponse({ success: true });
-                    break;
-                    
-                case 'NOTIFICATION_PERMISSION_CHANGED':
-                    this.handlePermissionChange(message.data, sender);
-                    sendResponse({ success: true });
-                    break;
-                    
-                case 'DELETE_SUBSCRIPTION':
-                    this.deletePushSubscription(message.data.endpoint)
-                        .then(result => sendResponse(result))
-                        .catch(error => sendResponse({ error: error.message }));
-                    break;
-                    
-                case 'GET_STATS':
-                    sendResponse(this.getMessageStats());
-                    break;
-                    
-                case 'TEST_NOTIFICATION':
-                    this.showTestNotification(message.data);
-                    sendResponse({ success: true });
-                    break;
-                    
-                default:
-                    sendResponse({ error: 'Unknown message type' });
-            }
-            return true; // Async response.
+            this.handleMessage(message, sender, sendResponse);
+            return true;
         });
     }
 
+    async handleMessage(message, sender, sendResponse) {
+        const handlers = {
+            'GET_MESSAGES': () => ({ messages: this.messages }),
+            'CLEAR_MESSAGES': () => this.clearAllMessages(),
+            'GET_SUBSCRIPTIONS': () => ({ subscriptions: Array.from(this.subscriptions.entries()) }),
+            'PUSH_SUBSCRIPTION_FOUND': () => this.handleSubscriptionEvent(message.data, sender),
+            'PUSH_SUBSCRIPTION_UPDATE': () => this.handleSubscriptionEvent(message.data, sender),
+            'NOTIFICATION_PERMISSION_CHANGED': () => this.handlePermissionChange(message.data, sender),
+            'TEST_NOTIFICATION': () => this.showTestNotification(message.data)
+        };
+
+        try {
+            const handler = handlers[message.type];
+            if (handler) {
+                const result = await handler();
+                sendResponse(result || { success: true });
+            } else {
+                sendResponse({ error: 'Unknown message type' });
+            }
+        } catch (error) {
+            console.error('Error handling message:', error);
+            sendResponse({ error: error.message });
+        }
+    }
+
+    // Push event handling
     setupPushEventListeners() {
-        // Listen for push events from the Push Service.
         self.addEventListener('push', (event) => {
-            console.log('Push event received:', event);
-            
-            let notificationData = {
-                title: 'Push Notification',
-                body: 'You have a new message',
-                icon: '/icons/icon48.png',
-                badge: '/icons/icon16.png',
-                tag: 'default',
-                data: {
-                    url: chrome.runtime.getURL('popup.html'),
-                    timestamp: Date.now()
-                }
-            };
-
-            // Handle push message with payload.
-            if (event.data) {
-                try {
-                    const payload = event.data.json();
-                    
-                    // Check if it's a declarative push message.
-                    if (payload.web_push === 8030 && payload.notification) {
-                        notificationData = this.parseDeclarativePushMessage(payload);
-                    } else {
-                        // Handle custom payload format.
-                        notificationData = {
-                            ...notificationData,
-                            title: payload.title || notificationData.title,
-                            body: payload.body || payload.message || notificationData.body,
-                            icon: payload.icon || notificationData.icon,
-                            image: payload.image,
-                            data: {
-                                ...notificationData.data,
-                                url: payload.url || payload.navigate,
-                                customData: payload.data
-                            }
-                        };
-                    }
-                } catch (error) {
-                    console.error('Error parsing push payload:', error);
-                    // Use plain text if JSON parsing fails.
-                    notificationData.body = event.data.text();
-                }
-            }
-
-            // Store the message.
-            this.storePushMessage(notificationData);
-
-            // Show the notification.
-            event.waitUntil(
-                self.registration.showNotification(
-                    notificationData.title, 
-                    notificationData
-                )
-            );
+            this.handlePushEvent(event);
         });
 
-        // Handle push subscription changes.
         self.addEventListener('pushsubscriptionchange', (event) => {
-            console.log('Push subscription changed:', event);
-            
-            event.waitUntil(
-                this.handleSubscriptionChange(event.oldSubscription, event.newSubscription)
-            );
+            this.handleSubscriptionChange(event.oldSubscription, event.newSubscription);
         });
     }
 
-    setupNotificationEventListeners() {
-        // Handle notification clicks.
-        self.addEventListener('notificationclick', (event) => {
-            console.log('Notification clicked:', event);
-            
-            event.notification.close();
+    async handlePushEvent(event) {
+        console.log('Push event received:', event);
+        
+        const notificationData = this.parsePushData(event);
+        await this.storePushMessage(notificationData);
+        
+        event.waitUntil(
+            self.registration.showNotification(notificationData.title, notificationData)
+        );
+    }
 
-            const notificationData = event.notification.data || {};
-            const url = notificationData.url || chrome.runtime.getURL('popup.html');
+    parsePushData(event) {
+        let notificationData = {
+            title: 'Push Notification',
+            body: 'You have a new message',
+            icon: '/icons/icon48.png',
+            badge: '/icons/icon16.png',
+            tag: 'default',
+            data: { url: chrome.runtime.getURL('popup.html'), timestamp: Date.now() }
+        };
 
-            event.waitUntil(
-                clients.matchAll({ type: 'window' }).then((clientList) => {
-                    // Check if there's already a window/tab open with the target URL.
-                    for (const client of clientList) {
-                        if (client.url === url && 'focus' in client) {
-                            return client.focus();
+        if (event.data) {
+            try {
+                const payload = event.data.json();
+                
+                if (payload.web_push === 8030 && payload.notification) {
+                    notificationData = this.parseDeclarativePushMessage(payload);
+                } else {
+                    notificationData = {
+                        ...notificationData,
+                        title: payload.title || notificationData.title,
+                        body: payload.body || payload.message || notificationData.body,
+                        icon: payload.icon || notificationData.icon,
+                        image: payload.image,
+                        data: {
+                            ...notificationData.data,
+                            url: payload.url || payload.navigate,
+                            customData: payload.data
                         }
-                    }
-                    
-                    // Open new window/tab if none exists.
-                    if (clients.openWindow) {
-                        return clients.openWindow(url);
-                    }
-                })
-            );
+                    };
+                }
+            } catch (error) {
+                console.error('Error parsing push payload:', error);
+                notificationData.body = event.data.text();
+            }
+        }
 
-            // Update message as clicked.
-            this.updateMessageStatus(event.notification.tag, 'clicked');
-        });
-
-        // Handle notification close events.
-        self.addEventListener('notificationclose', (event) => {
-            console.log('Notification closed:', event);
-            
-            // Update message as dismissed.
-            this.updateMessageStatus(event.notification.tag, 'dismissed');
-        });
+        return notificationData;
     }
 
     parseDeclarativePushMessage(payload) {
@@ -211,6 +146,48 @@ class PushNotificationManager {
         };
     }
 
+    // Notification event handling
+    setupNotificationEventListeners() {
+        self.addEventListener('notificationclick', (event) => {
+            this.handleNotificationClick(event);
+        });
+
+        self.addEventListener('notificationclose', (event) => {
+            this.handleNotificationClose(event);
+        });
+    }
+
+    handleNotificationClick(event) {
+        console.log('Notification clicked:', event);
+        
+        event.notification.close();
+
+        const notificationData = event.notification.data || {};
+        const url = notificationData.url || chrome.runtime.getURL('popup.html');
+
+        event.waitUntil(
+            clients.matchAll({ type: 'window' }).then((clientList) => {
+                for (const client of clientList) {
+                    if (client.url === url && 'focus' in client) {
+                        return client.focus();
+                    }
+                }
+                
+                if (clients.openWindow) {
+                    return clients.openWindow(url);
+                }
+            })
+        );
+
+        this.updateMessageStatus(event.notification.tag, 'clicked');
+    }
+
+    handleNotificationClose(event) {
+        console.log('Notification closed:', event);
+        this.updateMessageStatus(event.notification.tag, 'dismissed');
+    }
+
+    // Data management
     async storePushMessage(notificationData) {
         const message = {
             id: this.generateId(),
@@ -225,88 +202,9 @@ class PushNotificationManager {
         };
 
         this.messages.unshift(message);
-
-        // Limit message count.
-        if (this.messages.length > this.maxMessages) {
-            this.messages = this.messages.slice(0, this.maxMessages);
-        }
-
+        this.limitMessages();
         await this.saveMessages();
-        this.notifyPopupUpdateOnly();
-    }
-
-    async handleSubscriptionEvent(subscriptionData, sender) {
-        try {
-            const subscription = {
-                endpoint: subscriptionData.endpoint,
-                keys: subscriptionData.keys || {},
-                options: subscriptionData.options || {},
-                scope: subscriptionData.scope,
-                tabId: sender.tab?.id,
-                url: sender.tab?.url || subscriptionData.url,
-                timestamp: new Date().toISOString()
-            };
-
-            this.subscriptions.set(subscription.endpoint, subscription);
-            await this.saveSubscriptions();
-
-            console.log('Push subscription detected:', subscription.endpoint, 'for', subscription.url);
-            return { success: true, subscription };
-        } catch (error) {
-            console.error('Error handling subscription event:', error);
-            return { error: error.message };
-        }
-    }
-
-    async handlePermissionChange(permissionData, sender) {
-        try {
-            console.log('Notification permission changed:', permissionData.permission, 'for', permissionData.url);
-            // Just log permission changes, don't store as messages
-            return { success: true };
-        } catch (error) {
-            console.error('Error handling permission change:', error);
-            return { error: error.message };
-        }
-    }
-
-    async deletePushSubscription(endpoint) {
-        try {
-            if (this.subscriptions.has(endpoint)) {
-                this.subscriptions.delete(endpoint);
-                await this.saveSubscriptions();
-                return { success: true };
-            } else {
-                return { error: 'Subscription not found' };
-            }
-        } catch (error) {
-            console.error('Error deleting push subscription:', error);
-            return { error: error.message };
-        }
-    }
-
-    async handleSubscriptionChange(oldSubscription, newSubscription) {
-        console.log('Handling subscription change:', { oldSubscription, newSubscription });
-        
-        // Update stored subscriptions.
-        if (oldSubscription) {
-            this.subscriptions.delete(oldSubscription.endpoint);
-        }
-        
-        if (newSubscription) {
-            this.subscriptions.set(newSubscription.endpoint, {
-                endpoint: newSubscription.endpoint,
-                keys: newSubscription.getKey ? {
-                    p256dh: newSubscription.getKey('p256dh'),
-                    auth: newSubscription.getKey('auth')
-                } : {},
-                timestamp: new Date().toISOString()
-            });
-        }
-
-        await this.saveSubscriptions();
-        
-        // Just log subscription changes, don't store as messages
-        console.log('Subscription change processed:', newSubscription ? 'updated' : 'removed');
+        this.notifyPopupUpdate();
     }
 
     async showTestNotification(data = {}) {
@@ -323,7 +221,6 @@ class PushNotificationManager {
             }
         };
 
-        // Store test notification with special type
         const message = {
             id: this.generateId(),
             title: notificationData.title,
@@ -331,39 +228,70 @@ class PushNotificationManager {
             icon: notificationData.icon,
             url: notificationData.data?.url || '',
             timestamp: new Date().toISOString(),
-            type: 'test_notification', // Special type for test notifications
+            type: 'test_notification',
             status: 'sent',
             data: notificationData.data
         };
 
         this.messages.unshift(message);
-        if (this.messages.length > this.maxMessages) {
-            this.messages = this.messages.slice(0, this.maxMessages);
-        }
-        
-        // Save and notify in one go
+        this.limitMessages();
         await this.saveMessages();
-        this.notifyPopupUpdateOnly();
+        this.notifyPopupUpdate();
         
-        return self.registration.showNotification(
-            notificationData.title,
-            notificationData
-        );
+        return self.registration.showNotification(notificationData.title, notificationData);
     }
 
-    updateMessageStatus(tag, status) {
-        const message = this.messages.find(msg => 
-            msg.data?.tag === tag || msg.id === tag
-        );
-        
-        if (message) {
-            message.status = status;
-            message.updatedAt = new Date().toISOString();
-            this.saveMessages();
-            this.notifyPopupUpdate();
+    // Subscription management
+    async handleSubscriptionEvent(subscriptionData, sender) {
+        try {
+            const subscription = {
+                endpoint: subscriptionData.endpoint,
+                keys: subscriptionData.keys || {},
+                options: subscriptionData.options || {},
+                scope: subscriptionData.scope,
+                tabId: sender.tab?.id,
+                url: sender.tab?.url || subscriptionData.url,
+                timestamp: new Date().toISOString()
+            };
+
+            this.subscriptions.set(subscription.endpoint, subscription);
+            await this.saveSubscriptions();
+            console.log('Push subscription detected:', subscription.endpoint, 'for', subscription.url);
+            return { success: true, subscription };
+        } catch (error) {
+            console.error('Error handling subscription event:', error);
+            return { error: error.message };
         }
     }
 
+    async handlePermissionChange(permissionData, sender) {
+        console.log('Notification permission changed:', permissionData.permission, 'for', permissionData.url);
+        return { success: true };
+    }
+
+    async handleSubscriptionChange(oldSubscription, newSubscription) {
+        console.log('Handling subscription change:', { oldSubscription, newSubscription });
+        
+        if (oldSubscription) {
+            this.subscriptions.delete(oldSubscription.endpoint);
+        }
+        
+        if (newSubscription) {
+            this.subscriptions.set(newSubscription.endpoint, {
+                endpoint: newSubscription.endpoint,
+                keys: newSubscription.getKey ? {
+                    p256dh: newSubscription.getKey('p256dh'),
+                    auth: newSubscription.getKey('auth')
+                } : {},
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        await this.saveSubscriptions();
+        console.log('Subscription change processed:', newSubscription ? 'updated' : 'removed');
+    }
+
+    // Storage operations
     async loadMessages() {
         try {
             const result = await chrome.storage.local.get(['messages']);
@@ -407,36 +335,43 @@ class PushNotificationManager {
         }
     }
 
+    // Utility methods
     async clearAllMessages() {
         console.log('Clearing all messages, current count:', this.messages.length);
         this.messages = [];
         await this.saveMessages();
         console.log('Messages cleared and saved, new count:', this.messages.length);
-        this.notifyPopupUpdateOnly();
+        this.notifyPopupUpdate();
+    }
+
+    updateMessageStatus(tag, status) {
+        const message = this.messages.find(msg => 
+            msg.data?.tag === tag || msg.id === tag
+        );
+        
+        if (message) {
+            message.status = status;
+            message.updatedAt = new Date().toISOString();
+            this.saveMessages();
+            this.notifyPopupUpdate();
+        }
+    }
+
+    limitMessages() {
+        if (this.messages.length > this.maxMessages) {
+            this.messages = this.messages.slice(0, this.maxMessages);
+        }
     }
 
     notifyPopupUpdate() {
-        // Save first, then notify
-        this.saveMessages().then(() => {
-            this.notifyPopupUpdateOnly();
-        });
-    }
-
-    notifyPopupUpdateOnly() {
-        // Notify popup of message updates without saving.
         try {
             chrome.runtime.sendMessage({
                 type: 'MESSAGE_UPDATED',
                 count: this.messages.length,
                 timestamp: Date.now()
-            }, (response) => {
-                if (chrome.runtime.lastError) {
-                    // Popup might not be open, ignore error.
-                    return;
-                }
             });
         } catch (error) {
-            // Popup might not be open, ignore error.
+            // Popup might not be open, ignore error
         }
     }
 
@@ -444,14 +379,7 @@ class PushNotificationManager {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
     }
 
-    generateKey() {
-        // Generate a simple key for demo purposes.
-        // In production, use proper cryptographic key generation.
-        return btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))));
-    }
-
     cleanupOldMessages() {
-        // Clean up messages older than 30 days.
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -465,8 +393,7 @@ class PushNotificationManager {
             console.log(`Cleaned up ${originalLength - this.messages.length} old messages`);
         }
 
-        // Schedule next cleanup.
-        setTimeout(() => this.cleanupOldMessages(), 24 * 60 * 60 * 1000); // 24 hours.
+        setTimeout(() => this.cleanupOldMessages(), 24 * 60 * 60 * 1000);
     }
 
     getMessageStats() {
@@ -490,7 +417,6 @@ class PushNotificationManager {
             newest: this.messages.length > 0 ? this.messages[0].timestamp : null
         };
 
-        // Statistics by type.
         this.messages.forEach(msg => {
             stats.byType[msg.type] = (stats.byType[msg.type] || 0) + 1;
             stats.byStatus[msg.status] = (stats.byStatus[msg.status] || 0) + 1;
@@ -500,20 +426,14 @@ class PushNotificationManager {
     }
 }
 
-// Initialize the push notification manager.
+// Initialize
 const pushNotificationManager = new PushNotificationManager();
 
-// Handle extension install and update.
+// Extension lifecycle
 chrome.runtime.onInstalled.addListener((details) => {
     console.log('Chrome Push Notification Collector installed/updated:', details.reason);
-    
-    if (details.reason === 'install') {
-        console.log('Extension installed successfully. Ready to collect push notifications.');
-        // Don't store welcome messages - just log
-    }
 });
 
-// Handle extension startup.
 chrome.runtime.onStartup.addListener(() => {
     console.log('Chrome Push Notification Collector started');
 });

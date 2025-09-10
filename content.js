@@ -1,30 +1,27 @@
-// Content script - Push API subscription management and page integration
-class PushSubscriptionHelper {
+// Content script - Push API subscription detection
+class PushSubscriptionDetector {
     constructor() {
         this.isInitialized = false;
-        this.subscriptionStatus = 'unknown';
         this.init();
     }
 
     init() {
-        if (this.isInitialized) return;
+        if (this.isInitialized || this.isExtensionPage()) return;
         
-        // Avoid running on extension and special pages.
-        if (window.location.href.startsWith('chrome://') || 
-            window.location.href.startsWith('chrome-extension://') ||
-            window.location.href.startsWith('moz-extension://')) {
-            return;
-        }
-
         this.isInitialized = true;
         this.checkPushApiSupport();
         this.monitorPushSubscriptions();
         
-        console.log('Push Subscription Helper loaded for:', window.location.href);
+        console.log('Push Subscription Detector loaded for:', window.location.href);
+    }
+
+    isExtensionPage() {
+        return window.location.href.startsWith('chrome://') || 
+               window.location.href.startsWith('chrome-extension://') ||
+               window.location.href.startsWith('moz-extension://');
     }
 
     checkPushApiSupport() {
-        // Check if the browser supports Push API.
         const support = {
             serviceWorker: 'serviceWorker' in navigator,
             pushManager: 'PushManager' in window,
@@ -57,7 +54,12 @@ class PushSubscriptionHelper {
     }
 
     monitorPushSubscriptions() {
-        // Monitor service worker messages.
+        this.monitorServiceWorkerMessages();
+        this.monitorPermissions();
+        this.interceptPushMethods();
+    }
+
+    monitorServiceWorkerMessages() {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.addEventListener('message', (event) => {
                 if (event.data?.type === 'PUSH_SUBSCRIPTION_UPDATE') {
@@ -65,12 +67,6 @@ class PushSubscriptionHelper {
                 }
             });
         }
-
-        // Monitor notification permission changes.
-        this.monitorPermissions();
-
-        // Intercept push subscription creation.
-        this.interceptPushMethods();
     }
 
     monitorPermissions() {
@@ -88,7 +84,11 @@ class PushSubscriptionHelper {
     }
 
     interceptPushMethods() {
-        // Intercept service worker registration.
+        this.interceptServiceWorkerRegistration();
+        this.checkExistingRegistrations();
+    }
+
+    interceptServiceWorkerRegistration() {
         const originalRegister = navigator.serviceWorker.register;
         const self = this;
         
@@ -101,8 +101,9 @@ class PushSubscriptionHelper {
             
             return registration;
         };
+    }
 
-        // Check existing registrations.
+    checkExistingRegistrations() {
         navigator.serviceWorker.getRegistrations().then(registrations => {
             registrations.forEach(registration => {
                 if (registration.pushManager) {
@@ -207,7 +208,6 @@ class PushSubscriptionHelper {
         try {
             chrome.runtime.sendMessage(messageData, (response) => {
                 if (chrome.runtime.lastError) {
-                    // Ignore connection errors when background script is reloading.
                     if (!chrome.runtime.lastError.message?.includes('Receiving end does not exist')) {
                         console.log('Runtime error:', chrome.runtime.lastError.message);
                     }
@@ -219,7 +219,7 @@ class PushSubscriptionHelper {
     }
 }
 
-// Initialize the push subscription helper.
-if (!window.pushSubscriptionHelper) {
-    window.pushSubscriptionHelper = new PushSubscriptionHelper();
+// Initialize
+if (!window.pushSubscriptionDetector) {
+    window.pushSubscriptionDetector = new PushSubscriptionDetector();
 }
