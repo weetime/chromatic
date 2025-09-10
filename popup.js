@@ -2,7 +2,6 @@
 class PushMessageCollector {
     constructor() {
         this.messages = [];
-        this.subscriptions = [];
         this.sortColumn = 'timestamp';
         this.sortDirection = 'desc';
         this.updateInterval = null;
@@ -20,11 +19,7 @@ class PushMessageCollector {
     }
 
     async loadData() {
-        await Promise.all([
-            this.loadMessages(),
-            this.loadSubscriptions(),
-            this.loadSubscriptionsFromBackground()
-        ]);
+        await this.loadMessages();
     }
 
     setupEventListeners() {
@@ -98,32 +93,6 @@ class PushMessageCollector {
         }
     }
 
-    async loadSubscriptions() {
-        try {
-            const result = await chrome.storage.local.get(['subscriptions']);
-            const subscriptionEntries = result.subscriptions || [];
-            this.subscriptions = subscriptionEntries;
-            console.log('Loaded subscriptions from storage:', subscriptionEntries.length);
-        } catch (error) {
-            console.error('Failed to load subscriptions:', error);
-            this.subscriptions = [];
-        }
-    }
-
-    async loadSubscriptionsFromBackground() {
-        try {
-            const response = await chrome.runtime.sendMessage({
-                type: 'GET_SUBSCRIPTIONS'
-            });
-            
-            if (response?.subscriptions) {
-                this.subscriptions = response.subscriptions;
-                console.log('Loaded subscriptions from background:', response.subscriptions.length);
-            }
-        } catch (error) {
-            console.error('Failed to load subscriptions from background:', error);
-        }
-    }
 
     // UI rendering
     renderMessages() {
@@ -333,23 +302,19 @@ class PushMessageCollector {
 
         document.getElementById('totalCount').textContent = totalCount;
         document.getElementById('todayCount').textContent = todayCount;
-        
-        const subscriptionCountEl = document.getElementById('subscriptionCount');
-        if (subscriptionCountEl) {
-            subscriptionCountEl.textContent = this.subscriptions.length;
-        }
     }
 
     setupRealtimeUpdates() {
         this.updateInterval = setInterval(async () => {
             const oldCount = this.messages.length;
+            
             await this.loadMessages();
             
             if (this.messages.length !== oldCount) {
                 this.renderMessages();
                 this.updateStats();
             }
-        }, 1000);
+        }, 2000); // Reduced frequency to 2 seconds
 
         if (chrome?.storage?.onChanged) {
             this.storageListener = (changes, namespace) => {
@@ -396,7 +361,6 @@ class PushMessageCollector {
     // Push API controls
     setupPushApiControls() {
         this.addTestButton();
-        this.updateSubscriptionInfo();
     }
 
     addTestButton() {
@@ -438,18 +402,6 @@ class PushMessageCollector {
         }
     }
 
-    updateSubscriptionInfo() {
-        const statsContainer = document.querySelector('.stats');
-        if (statsContainer && !document.getElementById('subscriptionCount')) {
-            const subscriptionStat = document.createElement('div');
-            subscriptionStat.className = 'stat-item';
-            subscriptionStat.innerHTML = `
-                <span class="stat-label">Push订阅:</span>
-                <span id="subscriptionCount" class="stat-value">${this.subscriptions.length}</span>
-            `;
-            statsContainer.appendChild(subscriptionStat);
-        }
-    }
 
     // Utility methods
     getTypeIcon(type) {
