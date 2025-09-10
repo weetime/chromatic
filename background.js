@@ -38,6 +38,7 @@ class PushNotificationManager {
         const handlers = {
             'GET_MESSAGES': () => ({ messages: this.messages }),
             'CLEAR_MESSAGES': () => this.clearAllMessages(),
+            'DELETE_MESSAGE': () => this.deleteMessage(message.data.messageId),
             'GET_SUBSCRIPTIONS': () => ({ subscriptions: Array.from(this.subscriptions.entries()) }),
             'PUSH_SUBSCRIPTION_FOUND': () => this.handleSubscriptionEvent(message.data, sender),
             'PUSH_SUBSCRIPTION_UPDATE': () => this.handleSubscriptionEvent(message.data, sender),
@@ -342,6 +343,22 @@ class PushNotificationManager {
         await this.saveMessages();
         console.log('Messages cleared and saved, new count:', this.messages.length);
         this.notifyPopupUpdate();
+    }
+
+    async deleteMessage(messageId) {
+        console.log('Deleting message:', messageId, 'current count:', this.messages.length);
+        const initialCount = this.messages.length;
+        this.messages = this.messages.filter(msg => msg.id !== messageId);
+        
+        if (this.messages.length < initialCount) {
+            await this.saveMessages();
+            console.log('Message deleted and saved, new count:', this.messages.length);
+            this.notifyPopupUpdate();
+            return { success: true, deleted: true };
+        } else {
+            console.log('Message not found:', messageId);
+            return { success: false, error: 'Message not found' };
+        }
     }
 
     updateMessageStatus(tag, status) {

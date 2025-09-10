@@ -1,24 +1,29 @@
-/* Cyberpunk/Geek Style CSS for Push Collector */
+/* Flame Black Theme CSS for Push Collector */
 
 /* Import cyberpunk font */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
 
-/* CSS Variables for consistent theming */
+/* CSS Variables for Flame Black theme */
 :root {
-    --primary-bg: #0a0a0a;
-    --secondary-bg: #111111;
+    --primary-bg: #000000;
+    --secondary-bg: #0d0d0d;
     --accent-bg: #1a1a1a;
-    --border-color: #ff6b35;
-    --text-primary: #ff6b35;
-    --text-secondary: #ff8c42;
-    --text-muted: #888888;
-    --danger-color: #ff4757;
-    --warning-color: #ffa502;
-    --info-color: #3742fa;
-    --glow-color: #ff6b35;
-    --shadow-color: rgba(255, 107, 53, 0.1);
-    --grid-color: rgba(255, 107, 53, 0.05);
-    --metric-bg: rgba(255, 107, 53, 0.1);
+    --border-color: #ff4500;
+    --text-primary: #ff4500;
+    --text-secondary: #ff6347;
+    --text-muted: #666666;
+    --danger-color: #ff0000;
+    --warning-color: #ff8c00;
+    --info-color: #ff4500;
+    --success-color: #ff4500;
+    --glow-color: #ff4500;
+    --shadow-color: rgba(255, 69, 0, 0.2);
+    --grid-color: rgba(255, 69, 0, 0.08);
+    --metric-bg: rgba(255, 69, 0, 0.15);
+    --metric-border: rgba(255, 69, 0, 0.4);
+    --pulse-color: rgba(255, 69, 0, 0.6);
+    --flame-gradient: linear-gradient(45deg, #ff4500, #ff6347, #ff8c00);
+    --flame-glow: 0 0 20px rgba(255, 69, 0, 0.5);
 }
 
 /* Global styles */
@@ -43,7 +48,7 @@ body {
     position: relative;
 }
 
-/* Cyber grid background */
+/* Flame grid background */
 .cyber-grid {
     position: fixed;
     top: 0;
@@ -54,14 +59,24 @@ body {
         linear-gradient(var(--grid-color) 1px, transparent 1px),
         linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
     background-size: 24px 24px;
-    opacity: 0.15;
+    opacity: 0.2;
     z-index: 0;
-    animation: gridMove 30s linear infinite;
+    animation: flameGridMove 20s linear infinite;
 }
 
-@keyframes gridMove {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(20px, 20px); }
+@keyframes flameGridMove {
+    0% { 
+        transform: translate(0, 0);
+        opacity: 0.2;
+    }
+    50% { 
+        transform: translate(10px, 10px);
+        opacity: 0.3;
+    }
+    100% { 
+        transform: translate(20px, 20px);
+        opacity: 0.2;
+    }
 }
 
 .container {
@@ -89,13 +104,23 @@ body {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.05), transparent);
-    animation: scanLine 5s linear infinite;
+    background: var(--flame-gradient);
+    opacity: 0.1;
+    animation: flameScanLine 4s linear infinite;
 }
 
-@keyframes scanLine {
-    0% { left: -100%; }
-    100% { left: 100%; }
+@keyframes flameScanLine {
+    0% { 
+        left: -100%;
+        opacity: 0.1;
+    }
+    50% { 
+        opacity: 0.2;
+    }
+    100% { 
+        left: 100%;
+        opacity: 0.1;
+    }
 }
 
 .header-content {
@@ -130,17 +155,23 @@ body {
     height: 40px;
     border: 2px solid var(--border-color);
     border-radius: 50%;
-    animation: pulseRing 2s ease-out infinite;
+    animation: flamePulseRing 2s ease-out infinite;
+    box-shadow: var(--flame-glow);
 }
 
-@keyframes pulseRing {
+@keyframes flamePulseRing {
     0% {
         transform: scale(0.8);
         opacity: 1;
+        box-shadow: 0 0 10px var(--border-color);
+    }
+    50% {
+        box-shadow: 0 0 20px var(--border-color), 0 0 30px var(--text-secondary);
     }
     100% {
         transform: scale(1.4);
         opacity: 0;
+        box-shadow: 0 0 40px var(--border-color);
     }
 }
 
@@ -199,7 +230,8 @@ body {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.2), transparent);
+    background: var(--flame-gradient);
+    opacity: 0.2;
     transition: left 0.5s ease;
 }
 
@@ -208,9 +240,9 @@ body {
 }
 
 .btn:hover {
-    background: rgba(255, 107, 53, 0.2);
+    background: rgba(255, 69, 0, 0.2);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.2);
+    box-shadow: var(--flame-glow);
 }
 
 .btn-primary {
@@ -257,8 +289,10 @@ body {
 }
 
 .stat-item:hover {
-    background: rgba(255, 107, 53, 0.15);
+    background: rgba(255, 69, 0, 0.2);
     transform: translateY(-2px);
+    box-shadow: var(--flame-glow);
+    border-color: var(--text-primary);
 }
 
 /* Stat icons removed */
@@ -314,7 +348,7 @@ body {
     outline: none;
     border-color: var(--glow-color);
     background: var(--primary-bg);
-    box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.2);
+    box-shadow: var(--flame-glow);
 }
 
 .search-input::placeholder {
@@ -328,7 +362,7 @@ body {
     right: 0;
     bottom: 0;
     border-radius: 6px;
-    background: linear-gradient(45deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+    background: var(--flame-gradient);
     opacity: 0;
     transition: opacity 0.3s ease;
     pointer-events: none;
@@ -453,7 +487,9 @@ body {
 }
 
 .message-row:hover {
-    background: rgba(255, 107, 53, 0.05);
+    background: rgba(255, 69, 0, 0.08);
+    transform: translateX(2px);
+    box-shadow: inset 0 0 10px rgba(255, 69, 0, 0.1);
 }
 
 @keyframes fadeIn {
@@ -482,18 +518,25 @@ body {
     border: 1px solid transparent;
     background: var(--metric-bg);
     color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.type-badge:hover {
+    transform: scale(1.05);
+    box-shadow: var(--flame-glow);
+    border-color: var(--text-primary);
 }
 
 .type-push_notification {
-    border-color: var(--info-color);
-    background: rgba(0, 136, 255, 0.1);
-    color: var(--info-color);
+    border-color: var(--text-primary);
+    background: rgba(255, 69, 0, 0.2);
+    color: var(--text-primary);
 }
 
 .type-test_notification {
-    border-color: var(--warning-color);
-    background: rgba(255, 170, 0, 0.1);
-    color: var(--warning-color);
+    border-color: var(--text-secondary);
+    background: rgba(255, 99, 71, 0.2);
+    color: var(--text-secondary);
 }
 
 /* Title cell styles */
@@ -626,20 +669,20 @@ body {
 }
 
 .status-received {
-    border-color: var(--info-color);
-    background: rgba(0, 136, 255, 0.1);
-    color: var(--info-color);
+    border-color: var(--text-primary);
+    background: rgba(255, 69, 0, 0.2);
+    color: var(--text-primary);
 }
 
 .status-clicked {
-    border-color: var(--text-primary);
-    background: rgba(0, 255, 136, 0.1);
-    color: var(--text-primary);
+    border-color: var(--text-secondary);
+    background: rgba(255, 99, 71, 0.2);
+    color: var(--text-secondary);
 }
 
 .status-dismissed {
     border-color: var(--text-muted);
-    background: rgba(136, 136, 136, 0.1);
+    background: rgba(102, 102, 102, 0.2);
     color: var(--text-muted);
 }
 

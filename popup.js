@@ -149,10 +149,26 @@ class PushMessageCollector {
 
     // Message operations
     async deleteMessage(messageId) {
-        this.messages = this.messages.filter(msg => msg.id !== messageId);
-        await this.saveMessages();
-        this.renderMessages();
-        this.updateStats();
+        try {
+            const response = await chrome.runtime.sendMessage({
+                type: 'DELETE_MESSAGE',
+                data: { messageId: messageId }
+            });
+            
+            if (response?.success) {
+                console.log('Message deleted successfully:', messageId);
+                // Reload messages from storage to ensure consistency
+                await this.loadMessages();
+                this.renderMessages();
+                this.updateStats();
+            } else {
+                console.error('Failed to delete message:', response?.error);
+                alert('删除消息失败，请重试');
+            }
+        } catch (error) {
+            console.error('Error deleting message:', error);
+            alert('删除消息时发生错误，请重试');
+        }
     }
 
     async clearMessages() {
