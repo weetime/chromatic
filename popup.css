@@ -8,16 +8,17 @@
     --primary-bg: #0a0a0a;
     --secondary-bg: #111111;
     --accent-bg: #1a1a1a;
-    --border-color: #00ff88;
-    --text-primary: #00ff88;
-    --text-secondary: #00cc6a;
+    --border-color: #ff6b35;
+    --text-primary: #ff6b35;
+    --text-secondary: #ff8c42;
     --text-muted: #888888;
-    --danger-color: #ff0040;
-    --warning-color: #ffaa00;
-    --info-color: #0088ff;
-    --glow-color: #00ff88;
-    --shadow-color: rgba(0, 255, 136, 0.1);
-    --grid-color: rgba(0, 255, 136, 0.05);
+    --danger-color: #ff4757;
+    --warning-color: #ffa502;
+    --info-color: #3742fa;
+    --glow-color: #ff6b35;
+    --shadow-color: rgba(255, 107, 53, 0.1);
+    --grid-color: rgba(255, 107, 53, 0.05);
+    --metric-bg: rgba(255, 107, 53, 0.1);
 }
 
 /* Global styles */
@@ -52,10 +53,10 @@ body {
     background-image: 
         linear-gradient(var(--grid-color) 1px, transparent 1px),
         linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-    background-size: 20px 20px;
-    opacity: 0.1;
+    background-size: 24px 24px;
+    opacity: 0.15;
     z-index: 0;
-    animation: gridMove 20s linear infinite;
+    animation: gridMove 30s linear infinite;
 }
 
 @keyframes gridMove {
@@ -65,10 +66,9 @@ body {
 
 .container {
     background: linear-gradient(135deg, var(--secondary-bg) 0%, var(--accent-bg) 100%);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 12px;
     margin: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     overflow: hidden;
     position: relative;
     z-index: 1;
@@ -77,8 +77,7 @@ body {
 /* Header styles */
 .header {
     background: linear-gradient(135deg, var(--accent-bg) 0%, var(--secondary-bg) 100%);
-    border-bottom: 1px solid var(--border-color);
-    padding: 16px 20px;
+    padding: 20px 24px;
     position: relative;
     overflow: hidden;
 }
@@ -152,11 +151,11 @@ body {
 
 .logo-text h1 {
     font-family: 'Orbitron', monospace;
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 18px;
+    font-weight: 600;
     margin: 0;
     color: var(--text-primary);
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
 }
 
 .version {
@@ -176,21 +175,21 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
+    padding: 10px 16px;
+    border: 1px solid transparent;
+    border-radius: 8px;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    font-weight: 400;
+    font-size: 12px;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
     text-decoration: none;
     position: relative;
     overflow: hidden;
-    background: transparent;
+    background: var(--metric-bg);
     color: var(--text-primary);
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
 }
 
 .btn::before {
@@ -209,8 +208,9 @@ body {
 }
 
 .btn:hover {
-    background: rgba(0, 255, 136, 0.1);
-    transform: translateY(-1px);
+    background: rgba(255, 107, 53, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.2);
 }
 
 .btn-primary {
@@ -236,28 +236,29 @@ body {
 /* Statistics styles */
 .stats {
     display: flex;
-    padding: 16px 20px;
+    padding: 24px;
     background: var(--accent-bg);
-    border-bottom: 1px solid var(--border-color);
-    gap: 30px;
+    gap: 16px;
     position: relative;
     justify-content: center;
 }
 
 .stat-item {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 8px;
-    flex: 0 0 200px;
-    padding: 12px;
-    border: 1px solid rgba(0, 255, 136, 0.2);
-    border-radius: 4px;
-    background: rgba(0, 255, 136, 0.05);
+    gap: 4px;
+    flex: 0 0 120px;
+    padding: 16px 12px;
+    border-radius: 8px;
+    background: var(--metric-bg);
     transition: all 0.3s ease;
+    text-align: center;
 }
 
 .stat-item:hover {
-    background: rgba(0, 255, 136, 0.1);
+    background: rgba(255, 107, 53, 0.15);
+    transform: translateY(-2px);
 }
 
 /* Stat icons removed */
@@ -265,19 +266,20 @@ body {
 .stat-content {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
+    width: 100%;
 }
 
 .stat-label {
-    font-size: 10px;
+    font-size: 11px;
     color: var(--text-muted);
-    font-weight: 400;
+    font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
 }
 
 .stat-value {
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 700;
     color: var(--text-primary);
     font-family: 'Orbitron', monospace;
@@ -285,9 +287,8 @@ body {
 
 /* Search bar styles */
 .search-bar {
-    padding: 16px 20px;
+    padding: 20px 24px;
     background: var(--secondary-bg);
-    border-bottom: 1px solid var(--border-color);
     position: relative;
 }
 
@@ -297,37 +298,27 @@ body {
     align-items: center;
 }
 
-.search-icon {
-    position: absolute;
-    left: 12px;
-    z-index: 2;
-    color: var(--text-muted);
-}
-
 .search-input {
     width: 100%;
-    padding: 10px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
+    padding: 12px 16px;
+    border: 1px solid transparent;
+    border-radius: 8px;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 12px;
+    font-size: 13px;
     background: var(--accent-bg);
     color: var(--text-primary);
     transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
 .search-input:focus {
     outline: none;
     border-color: var(--glow-color);
     background: var(--primary-bg);
+    box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.2);
 }
 
 .search-input::placeholder {
     color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
 .search-glow {
@@ -336,8 +327,8 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    border-radius: 4px;
-    background: linear-gradient(45deg, transparent, rgba(0, 255, 136, 0.1), transparent);
+    border-radius: 6px;
+    background: linear-gradient(45deg, transparent, rgba(255, 107, 53, 0.1), transparent);
     opacity: 0;
     transition: opacity 0.3s ease;
     pointer-events: none;
@@ -394,17 +385,17 @@ body {
 
 .messages-table th {
     background: var(--accent-bg);
-    padding: 12px 16px;
+    padding: 14px 16px;
     text-align: left;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-primary);
-    border-bottom: 2px solid var(--border-color);
+    border-bottom: 1px solid rgba(255, 107, 53, 0.2);
     position: sticky;
     top: 0;
     z-index: 10;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    font-size: 10px;
+    letter-spacing: 0.5px;
+    font-size: 11px;
 }
 
 .messages-table th:nth-child(1) { width: 120px; } /* TYPE */
@@ -450,8 +441,8 @@ body {
 }
 
 .messages-table td {
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255, 107, 53, 0.05);
     vertical-align: middle;
     color: var(--text-secondary);
 }
@@ -462,8 +453,7 @@ body {
 }
 
 .message-row:hover {
-    background: rgba(0, 255, 136, 0.05);
-    box-shadow: inset 0 0 10px rgba(0, 255, 136, 0.1);
+    background: rgba(255, 107, 53, 0.05);
 }
 
 @keyframes fadeIn {
@@ -482,15 +472,15 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 9px;
-    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 600;
     white-space: nowrap;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    border: 1px solid;
-    background: rgba(0, 255, 136, 0.1);
+    letter-spacing: 0.5px;
+    border: 1px solid transparent;
+    background: var(--metric-bg);
     color: var(--text-primary);
 }
 
@@ -516,9 +506,8 @@ body {
 .favicon {
     width: 16px;
     height: 16px;
-    border-radius: 2px;
+    border-radius: 3px;
     flex-shrink: 0;
-    border: 1px solid var(--border-color);
 }
 
 .title {
@@ -604,12 +593,13 @@ body {
 /* Empty state icons removed */
 
 .empty-state h3 {
-    font-size: 16px;
-    margin-bottom: 8px;
+    font-size: 18px;
+    margin-bottom: 12px;
     color: var(--text-primary);
     font-family: 'Orbitron', monospace;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
+    font-weight: 600;
 }
 
 .empty-state p {
